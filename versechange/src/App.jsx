@@ -1,33 +1,63 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react"
+import "./App.css"
 
 function App() {
-  const [count, setCount] = useState(0)
+
+  const [verse, setVerse] = useState("")
+  const [number, setNumber] = useState("")
+
+  const onSubmit = e => {
+
+    e?.preventDefault()
+
+    const data = {
+      newVerse: verse,
+      numberVerse: number
+    }
+
+    console.log('data f -> ', data)
+
+    const QUERY_MUTATION = `
+          mutation($newVerse: String!, $numberVerse: String!) {
+              setVerse(newVerse: $newVerse, numberVerse: $numberVerse) {
+                  verse
+                  numberVerse
+              }
+          }
+    `;
+
+    const QUERY = {
+      query: QUERY_MUTATION,
+      variables: {
+        ...data
+      }
+    }
+
+    fetch("http://localhost:4200/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(QUERY)
+    })
+      .then(res => res.json())
+      .then(data => console.log(data))
+      .catch(err => console.error(err?.message))
+  }
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <form className="form" onSubmit={onSubmit}>
+        <div>
+          <label htmlFor="">Versiculo</label>
+          <input type="text" placeholder="versiculo" onChange={(e) => setVerse(e.target.value)} />
+        </div>
+        <div>
+          <label htmlFor="">Numero versiculo</label>
+          <input type="text" placeholder="Ej: 1 timeto 20" onChange={(e) => setNumber(e.target.value)} />
+        </div>
+        <input type="submit" className="button" />
+      </form>
     </>
   )
 }
